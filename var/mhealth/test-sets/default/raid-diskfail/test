@@ -1,0 +1,11 @@
+#!/bin/bash
+
+shouldbe="Online";
+
+while read line; do
+echo ${line}/${shouldbe}
+	if [ "$line" != "$shouldbe" ]; then
+		echo "There is a disk failure" > /tmp/mhealth.problemDesc
+		exit 1;
+	fi;
+done < <(MegaCli -LDPDInfo -a0 | grep 'Firmware state' | grep -v "Number of" |cut -d':' -f2 |sed -e's/ //')

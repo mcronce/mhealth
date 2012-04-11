@@ -1,0 +1,6 @@
+/var/log/mhealth/*log {
+  missingok
+  notifempty
+  sharedscripts
+  endscript
+}

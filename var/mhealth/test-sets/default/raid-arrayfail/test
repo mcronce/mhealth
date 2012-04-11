@@ -1,0 +1,11 @@
+#!/bin/bash
+
+shouldbe="Optimal";
+
+while read line; do
+echo ${line}/${shouldbe}
+	if [ "$line" != "$shouldbe" ]; then
+		echo "There is a array failure" > /tmp/mhealth.problemDesc
+		exit 1;
+	fi;
+done < <(MegaCli -LDPDInfo -a0 | grep '^State' | grep -v "Number of" |cut -d':' -f2 |sed -e's/ //')

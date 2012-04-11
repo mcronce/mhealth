@@ -1,0 +1,9 @@
+#!/bin/bash
+
+for NUM in $(lsof |grep eleted |awk '{print $7}'|grep -v ^0); do 
+	echo $NUM;
+	if [ $NUM -gt 1000000 ]; then 
+		echo "Deleted files may be getting too big. lsof |grep deleted" > /tmp/mhealth.problemDesc; 
+		exit 2;
+	fi; 
+done

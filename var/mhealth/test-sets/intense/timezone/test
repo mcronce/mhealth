@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ "$(date +%Z)" != "GMT" ]; then
+	echo "Time zone is not GMT!" > /tmp/mhealth.problemDesc
+	exit 1;
+fi;
+
+exit 0;

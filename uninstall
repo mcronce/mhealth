@@ -1,0 +1,49 @@
+#!/bin/bash
+
+BIN_DIR='/usr/bin';
+VAR_DIR='/var';
+ETC_DIR='/etc';
+LOGROTATE_DIR='/etc/logrotate.d';
+
+for arg in "$@"; do
+	case "$arg" in
+		--bin-dir=*)
+			BIN_DIR="${arg#--bin-dir=}";
+			;;
+		--var-dir=*)
+			VAR_DIR="${arg#--var-dir=}";
+			;;
+		--etc-dir=*)
+			ETC_DIR="${arg#--etc-dir=}";
+			;;
+		--logrotate-dir=*)
+			LOGROTATE_DIR="${arg#--logrotate-dir=}";
+			;;
+	esac;
+done;
+
+if [ -f "${BIN_DIR}/mhealth" ]; then 
+	echo "This will uninstall mhealth"
+
+	rm "${BIN_DIR}/mhealth";
+	rm -rf "${VAR_DIR}/mhealth";
+	rm "${ETC_DIR}/mhealth";
+	rm "${LOGROTATE_DIR}/mhealth";
+	rm -rf /var/log/mhealth
+
+	# Remove mhealth from root's crontab
+	crontab -l | tail -n+4 > /tmp/crontab.new
+	echo "" >> /tmp/crontab.new
+	sed -e "/mhealth/d" -i /tmp/crontab.new
+	crontab /tmp/crontab.new
+	rm /tmp/crontab.new
+
+	sed -e "/mhealth/d" -i /etc/bash/bashrc
+	sed -e "/mhealth/d" -i /etc/conf.d/local.start
+
+	echo "Uninstallation completed. "
+else
+	echo "!!! mhealth utility not installed. Please install before uninstalling"
+	exit 1;
+fi;
+

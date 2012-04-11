@@ -1,0 +1,16 @@
+#!/bin/bash
+
+MYPATH=/var/log
+MYLIMIT=10000000
+PATHSIZE=$(du -s $MYPATH |cut -f1)
+
+
+echo "The size of $MYPATH is $PATHSIZE"
+
+if [ $PATHSIZE -gt $MYLIMIT ]; then
+	echo "$PATHSIZE exceeds the limit of $MYLIMIT"
+	echo "$PATHSIZE exceeds the limit of $MYLIMIT" > /tmp/mhealth.problemDesc
+	exit 2;
+fi;
+
+exit 0;

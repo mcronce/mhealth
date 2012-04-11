@@ -1,0 +1,13 @@
+#!/bin/bash
+
+shouldbe="0";
+
+while read line; do
+echo ${line}/${shouldbe}
+	if [ "$line" != "$shouldbe" ]; then
+		echo "There is a disk failure on the horizon" > /tmp/mhealth.problemDesc
+		exit 2;
+	fi;
+done < <(MegaCli -LDPDInfo -a0 | grep 'Media Error Count\|Other Error Count\|Predictive Failure Count' | grep -v "Number of" |cut -d':' -f2 |sed -e's/ //')
+
+

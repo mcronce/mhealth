@@ -1,0 +1,24 @@
+#/bin/bash
+
+
+# Set the $PROCESS variable to the name of the process you want to test 
+# (or a string that uniquely identifies it in the output of ps -ef)
+PROCESS="/var/run/mysqld/mysqld2.pid"
+
+# Set the $ERRORMESSAGE variable to a string to report 
+# to the user about what has gone wrong
+ERRORMESSAGE="$The Config DB is not running";
+
+
+####################################
+#                                  #
+# Do not touch anything down here! #
+#                                  #
+####################################
+ps -ef |grep -v grep |grep $PROCESS
+if [ $? -ne 0 ]; then
+	echo "${ERRORMESSAGE}" > /tmp/mhealth.problemDesc
+	exit 1
+else
+    exit 0
+fi;

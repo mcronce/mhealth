@@ -1,0 +1,5 @@
+# SNMP trap receiver settings
+trapReceiver="127.0.0.1"; # IP address to send traps to
+trapCommunity=""; # community string for the receiver
+trapVersion="2c"; # SNMP version to use
+

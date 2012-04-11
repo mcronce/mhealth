@@ -1,0 +1,39 @@
+#/bin/bash
+
+#   INSTRUCTIONS:
+#
+# Put your BASH for your test here.
+# Set the $RESULT variable to 0 if the test passes
+# and to 1 if it fails.
+# Set the $ERRORMESSAGE variable to a string to report 
+# to the user about what has gone wrong
+# Feel free to echo whatever you want, we'll log it 
+# for posterity every time the test runs
+
+# Test stuff:
+SWAPUSED=`free -m |grep Swap| awk '{ print $3}'`
+
+# Check the result and set the vairable accordingly
+if [ ${SWAPUSED} -gt 100 ]; then
+    echo "!!! ${SWAPUSED} MB of swap in use.";
+	RESULT=1;
+else
+	RESULT=0;
+fi;
+
+ERRORMESSAGE="${SWAPUSED} MB of Swap in use.";
+
+
+####################################
+#                                  #
+# Do not touch anything down here! #
+#                                  #
+####################################
+
+if [ ${RESULT} -ne 0 ]; then
+	echo "${ERRORMESSAGE}" > /tmp/mhealth.problemDesc
+	exit 1
+else
+    exit 0
+fi;
+

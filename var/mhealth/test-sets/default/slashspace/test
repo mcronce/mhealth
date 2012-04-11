@@ -1,0 +1,8 @@
+#!/bin/bash
+
+usedspace=$(df | grep /$ |awk '{print $5}'|sed -e"s/%//")
+if [ ${usedspace} -gt 85 ]; then 
+	echo "Used Space at ${usedspace}%"
+	exit 1;
+fi;
+exit 0;

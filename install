@@ -1,0 +1,93 @@
+#!/bin/bash
+
+BIN_DIR='/usr/bin';
+VAR_DIR='/var';
+ETC_DIR='/etc';
+LOGROTATE_DIR='/etc/logrotate.d';
+
+INSTALL_FILES=1;
+REGISTER_CONFIG=1;
+
+for arg in "$@"; do
+	case "$arg" in
+		--bin-dir=*)
+			BIN_DIR="${arg#--bin-dir=}";
+			;;
+		--var-dir=*)
+			VAR_DIR="${arg#--var-dir=}";
+			;;
+		--etc-dir=*)
+			ETC_DIR="${arg#--etc-dir=}";
+			;;
+		--logrotate-dir=*)
+			LOGROTATE_DIR="${arg#--logrotate-dir=}";
+			;;
+		--skip-files)
+			INSTALL_FILES=0;
+			;;
+		--install-files)
+			INSTALL_FILES=1;
+			;;
+		--files-only)
+			INSTALL_FILES=1;
+			REGISTER_CONFIG=0;
+			;;
+		--skip-config)
+			REGISTER_CONFIG=0;
+			;;
+		--register-config)
+			REGISTER_CONFIG=1;
+			;;
+		--config-only)
+			INSTALL_FILES=0;
+			REGISTER_CONFIG=1;
+			;;
+	esac;
+done;
+
+if [ -f "${BIN_DIR}/mhealth" ]; then 
+	echo "!!! mhealth utility already installed. Please uninstall before installing"
+	exit 1;
+fi;
+
+echo "This will install $(grep ^mhealthVersion bin/mhealth | cut -d'=' -f2 | sed -e 's/"//g')"
+
+if [ "$INSTALL_FILES" == '0' ]; then
+	echo '--- Skipping file installations';
+else
+	echo "+++ cp -r bin/* \"${BIN_DIR}/\"/";
+	cp -r bin/* "${BIN_DIR}/";
+	echo "+++ cp -r var/mhealth \"${VAR_DIR}/\"";
+	cp -r var/mhealth "${VAR_DIR}/";
+	#echo "+++ cp -r etc/* \"${ETC_DIR}/\"";
+	#cp -r etc/* "${ETC_DIR}/";
+	echo "+++ cp etc/* \"${ETC_DIR}/\"";
+	cp etc/* "${ETC_DIR}/";
+	echo "+++ cp etc/logrotate.d/* \"${LOGROTATE_DIR}/\"";
+	cp -r etc/logrotate.d/* "${LOGROTATE_DIR}/";
+fi;
+
+if [ "$REGISTER_CONFIG" == '0' ]; then
+	echo '--- Skipping additions to crontab, local.start, and bashrc';
+else
+	# Add mhealth to root's crontab
+	crontab -l | tail -n+4 > /tmp/crontab.new
+	echo "" >> /tmp/crontab.new
+	echo "### mhealth linux health checker ###" >> /tmp/crontab.new
+	echo "*/5 * * * * ${BIN_DIR}/mhealth --run --quiet"  >> /tmp/crontab.new
+	echo "0 0 * * * ${BIN_DIR}/mhealth --run --test-set intense --quiet" >> /tmp/crontab.new
+	echo "### end of mhealth entries ###" >> /tmp/crontab.new
+	crontab /tmp/crontab.new
+	rm /tmp/crontab.new
+
+	# run at startup
+	echo "${BIN_DIR}/mhealth --run --quiet" >> /etc/conf.d/local.start
+
+	# SevOne specific commands:
+	#ln -sfn /etc/logrotate.d/mhealth /etc/logrotate.sevone.d/mhealth
+	echo "# show mhealth status at login" >> /etc/bash/bashrc
+	echo "${BIN_DIR}/mhealth --show-all-status" >> /etc/bash/bashrc
+fi;
+
+echo "Installation completed. Run mhealth --help for more information."
+
